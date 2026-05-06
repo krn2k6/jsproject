@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>keyflow — custom text practice</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-page="custom">
+  <nav>
+    <div class="nav-logo">key<em>flow</em></div>
+    <div class="nav-links">
+      <a href="index.html">home</a>
+      <a href="index.html#scores">leaderboard</a>
+      <a href="index.html#keyboard-section">keyboard</a>
+      <a href="custom.html">custom text</a>
+      <a href="login.html">login</a>
+    </div>
+    <div class="nav-actions">
+      <button class="theme-toggle" id="theme-toggle" aria-label="Switch theme">☀</button>
+      <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu">☰</button>
+    </div>
+  </nav>
+
+  <section id="hero">
+    <div class="hero-bg">
+      <div class="hero-grid"></div>
+      <div class="hero-glow"></div>
+    </div>
+    <div class="hero-eyebrow fade-in">custom practice</div>
+    <h1 class="hero-title fade-in-2">
+      <span class="line1">UPLOAD YOUR</span><br>
+      <span class="line2">OWN TEXT</span>
+    </h1>
+    <p class="hero-sub fade-in-3">Paste or upload any passage, start a personalized speed test, and share results with friends.</p>
+    <a href="#custom-section" class="hero-cta fade-in-3">upload text <span class="arrow">↓</span></a>
+  </section>
+
+  <section id="custom-section">
+    <div class="section-label">// 01 — custom text</div>
+    <h2 class="section-title">build your own typing challenge</h2>
+    <div class="form-card">
+      <div class="input-group">
+        <label for="custom-text-input">paste text</label>
+        <textarea id="custom-text-input" rows="6" placeholder="Paste any text here to generate a custom test..."></textarea>
+      </div>
+      <div class="file-row">
+        <label class="status-chip">or upload a .txt file</label>
+        <input id="custom-file" type="file" accept=".txt">
+      </div>
+      <div class="input-group">
+        <label for="custom-duration">duration</label>
+        <select id="custom-duration">
+          <option value="15">15 seconds</option>
+          <option value="30" selected>30 seconds</option>
+          <option value="60">60 seconds</option>
+          <option value="120">2 minutes</option>
+        </select>
+      </div>
+      <button id="load-custom-btn" class="btn-primary">load custom text</button>
+    </div>
+
+    <div class="share-card" id="share-block" style="display:none; margin-top:1.5rem;">
+      <div class="note-box" id="share-note">You can share this custom test with a link.</div>
+      <button id="share-link-btn" class="btn-primary">copy share link</button>
+    </div>
+  </section>
+
+  <section id="practice-section">
+    <div class="section-label">// 02 — practice</div>
+    <h2 class="section-title">type your uploaded passage</h2>
+    <div class="word-display" id="custom-display">
+      <div id="custom-words-wrap"></div>
+      <div class="result-overlay" id="custom-result-overlay">
+        <div class="result-lbl">words per minute</div>
+        <div class="result-wpm" id="custom-res-wpm">—</div>
+        <div class="result-details">
+          <span>accuracy <strong id="custom-res-acc">—</strong></span>
+          <span>words <strong id="custom-res-words">—</strong></span>
+          <span>chars <strong id="custom-res-chars">—</strong></span>
+        </div>
+        <button class="result-retry" id="custom-result-retry">restart ↺</button>
+      </div>
+    </div>
+
+    <textarea class="type-input" id="custom-type-input"
+      placeholder="Load a custom text first..."
+      spellcheck="false"
+      autocomplete="off"
+      autocorrect="off"
+      autocapitalize="off"
+      disabled></textarea>
+  </section>
+
+  <footer>
+    <div class="footer-logo">key<em>flow</em></div>
+    <div class="footer-tagline">custom practice, shared results, friendly rivalry.</div>
+    <div class="footer-links">
+      <a href="index.html">home</a>
+      <a href="login.html">login</a>
+      <a href="custom.html">custom</a>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

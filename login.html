@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>keyflow — login / register</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-page="auth">
+  <nav>
+    <div class="nav-logo">key<em>flow</em></div>
+    <div class="nav-links">
+      <a href="index.html">home</a>
+      <a href="index.html#scores">leaderboard</a>
+      <a href="index.html#keyboard-section">keyboard</a>
+      <a href="custom.html">custom text</a>
+      <a href="login.html">login / register</a>
+    </div>
+    <div class="nav-actions">
+      <button class="theme-toggle" id="theme-toggle" aria-label="Switch theme">☀</button>
+      <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu">☰</button>
+    </div>
+  </nav>
+
+  <section id="hero">
+    <div class="hero-bg">
+      <div class="hero-grid"></div>
+      <div class="hero-glow"></div>
+    </div>
+    <div class="hero-eyebrow fade-in">account center</div>
+    <h1 class="hero-title fade-in-2">
+      <span class="line1">LOG IN</span><br>
+      <span class="line2">OR JOIN THE RACE</span>
+    </h1>
+    <p class="hero-sub fade-in-3">Save your scores, see your rank, and compete with other typers in the shared leaderboard.</p>
+    <a href="index.html#scores" class="hero-cta fade-in-3">view leaderboard <span class="arrow">↓</span></a>
+  </section>
+
+  <section id="auth-section">
+    <div class="section-label">// 01 — account</div>
+    <h2 class="section-title">sign in or create an account</h2>
+    <div class="auth-card">
+      <div class="auth-tabs">
+        <div class="auth-tab active" data-tab="login">login</div>
+        <div class="auth-tab" data-tab="register">register</div>
+      </div>
+      <div id="auth-message" class="note-box">Use a username and password to save your practice sessions.</div>
+      <form id="login-form" class="auth-form">
+        <div class="input-group">
+          <label for="login-user">username</label>
+          <input id="login-user" type="text" autocomplete="username">
+        </div>
+        <div class="input-group">
+          <label for="login-pass">password</label>
+          <input id="login-pass" type="password" autocomplete="current-password">
+        </div>
+        <button type="submit" class="btn-primary">sign in</button>
+      </form>
+      <form id="register-form" class="auth-form" style="display:none;">
+        <div class="input-group">
+          <label for="register-user">username</label>
+          <input id="register-user" type="text" autocomplete="username">
+        </div>
+        <div class="input-group">
+          <label for="register-pass">password</label>
+          <input id="register-pass" type="password" autocomplete="new-password">
+        </div>
+        <button type="submit" class="btn-primary">create account</button>
+      </form>
+    </div>
+  </section>
+
+  <section id="board-preview">
+    <div class="section-label">// 02 — top typers</div>
+    <h2 class="section-title">global leaderboard</h2>
+    <div class="scores-grid">
+      <div class="scores-table">
+        <div class="scores-head">
+          <span>rank</span><span>wpm</span><span>player</span>
+        </div>
+        <div id="leaderboard-list"></div>
+      </div>
+      <div class="scores-aside">
+        <div class="stat-card stat-card--large">
+          <div class="stat-card__label">current user</div>
+          <div class="stat-card__big" id="profile-name">Guest</div>
+          <div class="stat-card__sub" id="profile-meta">not signed in</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__label">your stats</div>
+          <div class="mini-stats">
+            <div>
+              <div class="mini-val" id="profile-best">—</div>
+              <div class="mini-lbl">best WPM</div>
+            </div>
+            <div>
+              <div class="mini-val" id="profile-runs">0</div>
+              <div class="mini-lbl">runs</div>
+            </div>
+            <div>
+              <div class="mini-val" id="profile-acc">—</div>
+              <div class="mini-lbl">best acc</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-logo">key<em>flow</em></div>
+    <div class="footer-tagline">play, upload, share, and compete.</div>
+    <div class="footer-links">
+      <a href="index.html">home</a>
+      <a href="custom.html">custom text</a>
+      <a href="login.html">login</a>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
