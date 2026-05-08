@@ -17,9 +17,10 @@
     <div class="nav-links">
       <a href="#test">test</a>
       <a href="#scores">leaderboard</a>
-      <a href="#keyboard-section">keyboard</a>
       <a href="#tips">tips</a>
       <a href="custom.html">custom text</a>
+      <a href="about.html">about us</a>
+      <a href="contact.html">contact us</a>
       <a href="login.html">login / register</a>
     </div>
     <div class="nav-actions">
@@ -47,7 +48,6 @@
     </div>
   </section>
 
-  <!-- TEST -->
   <section id="test">
     <div class="section-label">// 01 — speed test</div>
     <h2 class="section-title">take the test</h2>
@@ -93,81 +93,13 @@
       <div class="stat-card"><div class="stat-val" id="s-words">0</div><div class="stat-lbl">Words</div></div>
       <div class="stat-card"><div class="stat-val" id="s-time">—</div><div class="stat-lbl">Time Left</div></div>
     </div>
-  </section>
-
-  <!-- KEYBOARD -->
-  <section id="keyboard-section">
-    <div class="section-label">// 02 — live keyboard</div>
-    <h2 class="section-title">watch your keys</h2>
-    <div class="keyboard" id="kb">
-      <div class="kb-row">
-        <div class="key" data-key="`">`</div>
-        <div class="key" data-key="1">1</div>
-        <div class="key" data-key="2">2</div>
-        <div class="key" data-key="3">3</div>
-        <div class="key" data-key="4">4</div>
-        <div class="key" data-key="5">5</div>
-        <div class="key" data-key="6">6</div>
-        <div class="key" data-key="7">7</div>
-        <div class="key" data-key="8">8</div>
-        <div class="key" data-key="9">9</div>
-        <div class="key" data-key="0">0</div>
-        <div class="key" data-key="-">-</div>
-        <div class="key" data-key="=">=</div>
-        <div class="key key--wide" data-key="Backspace">⌫</div>
-      </div>
-      <div class="kb-row">
-        <div class="key key--wide" data-key="Tab">tab</div>
-        <div class="key" data-key="q">q</div>
-        <div class="key" data-key="w">w</div>
-        <div class="key" data-key="e">e</div>
-        <div class="key" data-key="r">r</div>
-        <div class="key" data-key="t">t</div>
-        <div class="key" data-key="y">y</div>
-        <div class="key" data-key="u">u</div>
-        <div class="key" data-key="i">i</div>
-        <div class="key" data-key="o">o</div>
-        <div class="key" data-key="p">p</div>
-        <div class="key" data-key="[">[</div>
-        <div class="key" data-key="]">]</div>
-        <div class="key key--wide" data-key="\">\</div>
-      </div>
-      <div class="kb-row">
-        <div class="key key--xl" data-key="CapsLock">caps</div>
-        <div class="key" data-key="a">a</div>
-        <div class="key" data-key="s">s</div>
-        <div class="key" data-key="d">d</div>
-        <div class="key" data-key="f">f</div>
-        <div class="key" data-key="g">g</div>
-        <div class="key" data-key="h">h</div>
-        <div class="key" data-key="j">j</div>
-        <div class="key" data-key="k">k</div>
-        <div class="key" data-key="l">l</div>
-        <div class="key" data-key=";">;</div>
-        <div class="key" data-key="'">'</div>
-        <div class="key key--xl" data-key="Enter">↵</div>
-      </div>
-      <div class="kb-row">
-        <div class="key key--shift" data-key="Shift">shift</div>
-        <div class="key" data-key="z">z</div>
-        <div class="key" data-key="x">x</div>
-        <div class="key" data-key="c">c</div>
-        <div class="key" data-key="v">v</div>
-        <div class="key" data-key="b">b</div>
-        <div class="key" data-key="n">n</div>
-        <div class="key" data-key="m">m</div>
-        <div class="key" data-key=",">,</div>
-        <div class="key" data-key=".">.</div>
-        <div class="key" data-key="/">/</div>
-        <div class="key key--shift" data-key="Shift">shift</div>
-      </div>
-      <div class="kb-row">
-        <div class="key key--wide">ctrl</div>
-        <div class="key key--wide">alt</div>
-        <div class="key key--space" data-key=" ">space</div>
-        <div class="key key--wide">alt</div>
-        <div class="key key--wide">ctrl</div>
-      </div>
+    <div class="note-box note-box--info" id="save-note">Sign in or register to record scores and leaderboard progress.</div>
+    <div class="weak-words-panel" id="weak-words-panel">
+      <div class="section-label">// focus words</div>
+      <h3 class="section-title small">practice the words you miss most</h3>
+      <p class="weak-copy">After each run, this section highlights the words that need attention so you can improve accuracy with focused drills.</p>
+      <div class="weak-words-list" id="weak-words-list">Finish a session to generate a focused word list.</div>
+      <button class="btn-primary" id="practice-weak-btn">practice weak words</button>
     </div>
   </section>
 
@@ -243,8 +175,26 @@
       <div class="tip-card">
         <div class="tip-num">06</div>
         <div class="tip-title">target weak keys</div>
-        <div class="tip-body">Notice which keys you always stumble on. Slow down on those specific letters. Drilling your weakest keys yields faster improvement than general practice alone.</div>
+        <div class="tip-body">Notice which keys you always stumble on. Slow down on those specific letters. Drilling your weakest keys yields faster improvement than general practice.</div>
       </div>
+    </div>
+  </section>
+
+  <section class="page-links">
+    <div class="section-label">// 05 — explore</div>
+    <div class="page-links__inner">
+      <a class="page-card" href="custom.html">
+        <strong>try custom typing</strong>
+        <span>Upload your own text and keep practicing with personalized challenges.</span>
+      </a>
+      <a class="page-card" href="about.html">
+        <strong>about us</strong>
+        <span>Learn what this site is built for and why the layout stays distraction-free.</span>
+      </a>
+      <a class="page-card" href="contact.html">
+        <strong>contact us</strong>
+        <span>Send feedback or ask for a new feature directly from the site.</span>
+      </a>
     </div>
   </section>
 
@@ -253,9 +203,10 @@
     <div class="footer-logo">key<em>flow</em></div>
     <div class="footer-tagline">built for speed. designed for focus.</div>
     <div class="footer-links">
-      <a href="#test">test</a>
-      <a href="#scores">scores</a>
-      <a href="#tips">tips</a>
+      <a href="index.html">home</a>
+      <a href="custom.html">custom</a>
+      <a href="about.html">about</a>
+      <a href="contact.html">contact</a>
     </div>
   </footer>
 

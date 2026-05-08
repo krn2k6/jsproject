@@ -52,6 +52,7 @@ const state = {
   correctWords: 0,
   totalTyped: 0,
   wrongChars: 0,
+  weakWords: [],
   customText: null,
   suffix: '',
 };
@@ -178,6 +179,7 @@ function finish() {
   if (input) input.disabled = true;
 
   saveScore(wpm, acc, state.duration);
+  renderWeakWords();
 }
 
 function restartTest(custom = false) {
@@ -199,6 +201,7 @@ function restartTest(custom = false) {
   }
 
   buildDisplay();
+  renderWeakWords();
   const overlay = getId('result-overlay');
   if (overlay) overlay.classList.remove('show');
 
@@ -229,6 +232,12 @@ function restartTest(custom = false) {
 }
 
 function saveScore(wpm, acc, dur) {
+  if (!isLoggedIn()) {
+    const note = getId('save-note');
+    if (note) note.textContent = 'You are not logged in. Register or sign in to save results.';
+    return;
+  }
+
   const username = currentUser();
   STORAGE.scores.push({ username, wpm, acc, dur, date: new Date().toLocaleDateString() });
   STORAGE.scores.sort((a, b) => b.wpm - a.wpm || b.acc - a.acc);
@@ -280,6 +289,35 @@ function renderPersonalStats() {
   if (statRuns) statRuns.textContent = userScores.length;
   if (statAvg) statAvg.textContent = avg;
   if (statBestAcc) statBestAcc.textContent = userScores.length ? bestAcc + '%' : '—';
+}
+
+function renderWeakWords() {
+  const wrapper = getId('weak-words-list');
+  if (!wrapper) return;
+  if (!state.weakWords.length) {
+    wrapper.innerHTML = 'Finish a session to generate a focused word list.';
+    return;
+  }
+
+  wrapper.innerHTML = state.weakWords.slice(0, 12).map(word => `
+    <span class="weak-word-tag">${word}</span>
+  `).join('');
+}
+
+function practiceWeakWords() {
+  if (!state.weakWords.length) return;
+  state.wordList = [...new Set(state.weakWords)];
+  state.duration = 30;
+  restartTest();
+}
+
+function clearHistory() {
+  STORAGE.scores = [];
+  saveStorage();
+  renderLeaderboard();
+  renderPersonalStats();
+  const note = getId('save-note');
+  if (note) note.textContent = 'History cleared. Sign in to save fresh runs.';
 }
 
 function renderAuthProfile() {
@@ -368,15 +406,18 @@ function handleInput(e) {
     if (!typed.length) { e.target.value = ''; return; }
 
     const word = state.wordList[state.curWord];
-    if (typed === word) state.correctWords++;
-    state.totalTyped += typed.length;
+    const correct = typed === word;
+    if (correct) state.correctWords++;
+    if (!correct && word && !state.weakWords.includes(word)) state.weakWords.push(word);
 
-    word.split('').forEach((_, ci) => {
-      const tc = typed[ci];
-      if (tc === undefined) setCharState(state.curWord, ci, 'pending');
-      else if (tc === word[ci]) setCharState(state.curWord, ci, 'correct');
-      else { setCharState(state.curWord, ci, 'wrong'); state.wrongChars++; }
-    });
+    if (word) {
+      word.split('').forEach((_, ci) => {
+        const tc = typed[ci];
+        if (tc === undefined) setCharState(state.curWord, ci, 'pending');
+        else if (tc === word[ci]) setCharState(state.curWord, ci, 'correct');
+        else { setCharState(state.curWord, ci, 'wrong'); state.wrongChars++; }
+      });
+    }
 
     state.curWord++;
     state.curChar = 0;
@@ -452,7 +493,9 @@ function initHomePage() {
   state.customText = null;
   state.suffix = '';
   state.wordList = pickWords();
+  state.weakWords = [];
   buildDisplay();
+  renderWeakWords();
   renderLeaderboard();
   renderPersonalStats();
   renderUserGreeting();
@@ -469,6 +512,10 @@ function initHomePage() {
   if (restart) restart.addEventListener('click', () => restartTest());
   const retry = document.getElementById('result-retry');
   if (retry) retry.addEventListener('click', () => restartTest());
+  const clearBtn = document.getElementById('clear-btn');
+  if (clearBtn) clearBtn.addEventListener('click', clearHistory);
+  const weakBtn = document.getElementById('practice-weak-btn');
+  if (weakBtn) weakBtn.addEventListener('click', practiceWeakWords);
 }
 
 function initAuthPage() {
