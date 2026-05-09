@@ -12,6 +12,10 @@
 <body data-page="contact">
   <nav>
     <div class="nav-logo">key<em>flow</em></div>
+    <div id="user-menu" class="user-menu">
+      <button id="user-toggle" class="user-toggle" style="display:none;">User</button>
+      <div class="user-dropdown"></div>
+    </div>
     <div class="nav-links">
       <a href="index.html">home</a>
       <a href="index.html#scores">leaderboard</a>
@@ -26,15 +30,23 @@
     </div>
   </nav>
 
+  <div id="login-banner" class="login-banner">
+    <div class="banner-content">
+      <span>Not signed in</span>
+      <a href="login.html" class="banner-link">Sign in or register</a>
+      <span>to save your scores and compete on the leaderboard</span>
+    </div>
+    <button class="banner-close" id="banner-close" aria-label="Close banner">✕</button>
+  </div>
+
   <section id="hero">
     <div class="hero-bg">
       <div class="hero-grid"></div>
       <div class="hero-glow"></div>
     </div>
-    <div class="hero-eyebrow fade-in">contact keyflow</div>
     <h1 class="hero-title fade-in-2">
-      <span class="line1">LET'S</span><br>
-      <span class="line2">TALK TYPO</span>
+      <span class="line1">CONTACT</span><br>
+      <span class="line2">US</span>
     </h1>
     <p class="hero-sub fade-in-3">Questions, feedback, or feature ideas? Send us a quick note and we’ll respond as soon as possible.</p>
     <a href="#contact-section" class="hero-cta fade-in-3">send a message <span class="arrow">↓</span></a>
@@ -52,7 +64,7 @@
           <span>Online support • 9AM–6PM</span>
         </div>
       </div>
-      <form class="contact-form" onsubmit="alert('Message sent! Thanks for reaching out.'); return false;">
+      <form class="contact-form">
         <div class="input-group">
           <label for="contact-name">your name</label>
           <input id="contact-name" type="text" placeholder="A real name, please">
@@ -71,50 +83,22 @@
   </section>
 
   <section class="highlight-panel">
-    <div class="section-label">// 02 — edit later</div>
     <h2 class="section-title">team contact info and linkedins</h2>
-    <p class="page-copy">Replace these placeholders later with your actual contact details, LinkedIn IDs, photos, and short bios for you and your teammate.</p>
     <div class="contact-people-grid">
       <article class="contact-person-card contact-person-card--you">
-        <div class="editable-pill">your profile</div>
-        <h3>Your contact</h3>
-        <p><strong>Name:</strong> Your Name Here</p>
-        <p><strong>Email:</strong> yourname@example.com</p>
-        <p><strong>LinkedIn:</strong> linkedin.com/in/your-id</p>
-        <p><strong>Photo:</strong> add your headshot or avatar here.</p>
+        <div class="editable-pill">Karan Kumar</div>
+        <p><strong>Email:</strong> <a href="mailto:karan1124.be25@chitkarauniversity.edu.in">karan1124.be25@chitkarauniversity.edu.in</a></p>
+        <p><strong>LinkedIn:</strong> <a href="https://www.linkedin.com/in/karan-kumar-6462673b4/" target="_blank" rel="noopener">karan-kumar</a></p>
       </article>
       <article class="contact-person-card contact-person-card--teammate">
-        <div class="editable-pill">teammate profile</div>
-        <h3>Teammate contact</h3>
-        <p><strong>Name:</strong> Teammate Name Here</p>
-        <p><strong>Email:</strong> teammate@example.com</p>
-        <p><strong>LinkedIn:</strong> linkedin.com/in/teammate-id</p>
-        <p><strong>Photo:</strong> add a teammate photo or logo here.</p>
+        <div class="editable-pill">Kanav Aneja</div>
+        <p><strong>Email:</strong> <a href="mailto:kanav1122.be25@chitkarauniversity.edu.in">kanav1122.be25@chitkarauniversity.edu.in</a></p>
+        <p><strong>LinkedIn:</strong> <a href="https://www.linkedin.com/in/kanav-aneja-a930693a8/" target="_blank" rel="noopener">kanav-aneja</a></p>
       </article>
     </div>
   </section>
 
-  <section class="highlight-panel">
-    <div class="section-label">// 02 — contact info</div>
-    <h2 class="section-title">social links and team profiles</h2>
-    <div class="social-grid">
-      <div class="social-card">
-        <h3>Primary contact</h3>
-        <p><strong>Email:</strong> support@keyflow.test</p>
-        <p><strong>LinkedIn:</strong> linkedin.com/in/keyflow-support</p>
-      </div>
-      <div class="social-card">
-        <h3>Team links</h3>
-        <p><strong>Jordan</strong> — linkedin.com/in/jordansmith</p>
-        <p><strong>Mina</strong> — linkedin.com/in/minadoe</p>
-        <p><strong>Alex</strong> — linkedin.com/in/alex-typing</p>
-      </div>
-      <div class="social-card">
-        <h3>Photos & profiles</h3>
-        <p>Add your avatars or team photos here, plus a short bio for each profile so visitors know who built the app.</p>
-      </div>
-    </div>
-  </section>
+  <!-- Removed duplicate social links panel; profiles above contain contact details. -->
 
   <section class="page-links">
     <div class="section-label">// 02 — quick links</div>

@@ -1,6 +1,4 @@
-﻿// keyflow — app.js
-
-const WORDS = [
+﻿const WORDS = [
   'the','be','to','of','and','a','in','that','have','it','for','not','on','with',
   'he','as','you','do','at','this','but','his','by','from','they','we','say','her',
   'she','or','an','will','my','one','all','would','there','their','what','so','up',
@@ -349,6 +347,57 @@ function renderUserGreeting() {
   }
 }
 
+function renderLoginBanner() {
+  const banner = document.getElementById('login-banner');
+  if (!banner) return;
+  const closed = localStorage.getItem('typing_banner_closed') === '1';
+  if (isLoggedIn() || closed) {
+    banner.style.display = 'none';
+  } else {
+    banner.style.display = 'flex';
+  }
+}
+
+function closeBanner() {
+  const banner = document.getElementById('login-banner');
+  if (banner) banner.style.display = 'none';
+  localStorage.setItem('typing_banner_closed', '1');
+}
+
+function renderUserMenu() {
+  const userMenu = document.getElementById('user-menu');
+  const userToggle = document.getElementById('user-toggle');
+  if (!userMenu || !userToggle) return;
+  
+  if (isLoggedIn()) {
+    userToggle.style.display = 'flex';
+    userToggle.textContent = currentUser();
+    
+    const dropdown = userToggle.nextElementSibling;
+    if (dropdown && dropdown.classList.contains('user-dropdown')) {
+      dropdown.innerHTML = `
+        <div class="dropdown-item">Signed in as <strong>${currentUser()}</strong></div>
+        <div class="dropdown-divider"></div>
+        <button class="dropdown-item logout-btn">logout</button>
+      `;
+      dropdown.querySelector('.logout-btn').addEventListener('click', logout);
+    }
+  } else {
+    userToggle.style.display = 'none';
+  }
+}
+
+function logout() {
+  STORAGE.session = null;
+  localStorage.removeItem('typing_session');
+  renderUserMenu();
+  renderLoginBanner();
+  renderUserGreeting();
+  renderPersonalStats();
+  renderAuthProfile();
+  location.reload();
+}
+
 function setTheme(theme) {
   document.documentElement.dataset.theme = theme;
   localStorage.setItem('typing_theme', theme);
@@ -413,6 +462,7 @@ function handleInput(e) {
     if (word) {
       word.split('').forEach((_, ci) => {
         const tc = typed[ci];
+        state.totalTyped++;
         if (tc === undefined) setCharState(state.curWord, ci, 'pending');
         else if (tc === word[ci]) setCharState(state.curWord, ci, 'correct');
         else { setCharState(state.curWord, ci, 'wrong'); state.wrongChars++; }
@@ -446,10 +496,10 @@ function handleInput(e) {
   }
 
   placeCursor();
+  if (state.started) updateLiveStats();
 }
 
 function handleKeydown(e) {
-  // Disable the previous undo-word behavior so backspace only removes a single character.
 }
 
 function handleKeyVisualizerDown(e) {
@@ -553,6 +603,8 @@ function initAuthPage() {
       if (message) message.textContent = result;
       renderAuthProfile();
       renderUserGreeting();
+      renderUserMenu();
+      renderLoginBanner();
     });
   }
 
@@ -565,6 +617,8 @@ function initAuthPage() {
       if (message) message.textContent = result;
       renderAuthProfile();
       renderUserGreeting();
+      renderUserMenu();
+      renderLoginBanner();
     });
   }
 }
@@ -632,6 +686,26 @@ function initCustomPage() {
   if (retry) retry.addEventListener('click', () => restartTest());
 }
 
+function initContactPage() {
+  const form = document.querySelector('.contact-form');
+  const contactCard = document.querySelector('.contact-card');
+  if (!form) return;
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    alert('Message sent! Thanks for reaching out.');
+    // clear inputs
+    form.reset();
+    // optional lightweight confirmation text
+    if (contactCard) {
+      const note = document.createElement('div');
+      note.className = 'note-box';
+      note.textContent = 'Thanks — your message was sent.';
+      contactCard.appendChild(note);
+      setTimeout(() => note.remove(), 4000);
+    }
+  });
+}
+
 function loadCustomText(text) {
   state.customText = text;
   state.duration = parseInt(document.getElementById('custom-duration')?.value || '30', 10);
@@ -652,6 +726,7 @@ function registerUser(username, password) {
   saveStorage();
   STORAGE.session = username;
   localStorage.setItem('typing_session', username);
+  localStorage.setItem('typing_banner_closed', '1');
   return `Welcome, ${username}! You are now logged in.`;
 }
 
@@ -660,6 +735,7 @@ function loginUser(username, password) {
   if (!user) return 'Login failed. Check username and password.';
   STORAGE.session = user.username;
   localStorage.setItem('typing_session', user.username);
+  localStorage.setItem('typing_banner_closed', '1');
   return `Welcome back, ${user.username}!`;
 }
 
@@ -670,12 +746,20 @@ function init() {
   stopSpaceScroll();
   renderLeaderboard();
   renderUserGreeting();
+  renderLoginBanner();
+  renderUserMenu();
+
+  // banner close button
+  const bannerCloseBtn = document.getElementById('banner-close');
+  if (bannerCloseBtn) bannerCloseBtn.addEventListener('click', closeBanner);
 
   const path = window.location.pathname.split('/').pop();
   if (path === 'login.html') {
     initAuthPage();
   } else if (path === 'custom.html') {
     initCustomPage();
+  } else if (path === 'contact.html') {
+    initContactPage();
   } else {
     initHomePage();
   }

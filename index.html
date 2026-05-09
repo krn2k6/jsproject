@@ -11,9 +11,12 @@
 </head>
 <body>
 
-  <!-- NAV -->
   <nav>
     <div class="nav-logo">key<em>flow</em></div>
+    <div id="user-menu" class="user-menu">
+      <button id="user-toggle" class="user-toggle" style="display:none;">User</button>
+      <div class="user-dropdown"></div>
+    </div>
     <div class="nav-links">
       <a href="#test">test</a>
       <a href="#scores">leaderboard</a>
@@ -29,7 +32,15 @@
     </div>
   </nav>
 
-  <!-- HERO -->
+  <div id="login-banner" class="login-banner">
+    <div class="banner-content">
+      <span>Not signed in</span>
+      <a href="login.html" class="banner-link">Sign in or register</a>
+      <span>to save your scores and compete on the leaderboard</span>
+    </div>
+    <button class="banner-close" id="banner-close" aria-label="Close banner">✕</button>
+  </div>
+
   <section id="hero">
     <div class="hero-bg">
       <div class="hero-grid"></div>
@@ -93,7 +104,7 @@
       <div class="stat-card"><div class="stat-val" id="s-words">0</div><div class="stat-lbl">Words</div></div>
       <div class="stat-card"><div class="stat-val" id="s-time">—</div><div class="stat-lbl">Time Left</div></div>
     </div>
-    <div class="note-box note-box--info" id="save-note">Sign in or register to record scores and leaderboard progress.</div>
+    <div class="note-box note-box--info" id="save-note" style="display:none;"></div>
     <div class="weak-words-panel" id="weak-words-panel">
       <div class="section-label">// focus words</div>
       <h3 class="section-title small">practice the words you miss most</h3>
@@ -103,7 +114,6 @@
     </div>
   </section>
 
-  <!-- SCORES -->
   <section id="scores">
     <div class="section-label">// 03 — leaderboard</div>
     <h2 class="section-title">your best scores</h2>
@@ -142,7 +152,6 @@
     </div>
   </section>
 
-  <!-- TIPS -->
   <section id="tips">
     <div class="section-label">// 04 — improve</div>
     <h2 class="section-title">typing tips</h2>
@@ -198,7 +207,6 @@
     </div>
   </section>
 
-  <!-- FOOTER -->
   <footer>
     <div class="footer-logo">key<em>flow</em></div>
     <div class="footer-tagline">built for speed. designed for focus.</div>

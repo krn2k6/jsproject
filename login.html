@@ -12,6 +12,10 @@
 <body data-page="auth">
   <nav>
     <div class="nav-logo">key<em>flow</em></div>
+    <div id="user-menu" class="user-menu">
+      <button id="user-toggle" class="user-toggle" style="display:none;">User</button>
+      <div class="user-dropdown"></div>
+    </div>
     <div class="nav-links">
       <a href="index.html">home</a>
       <a href="index.html#scores">leaderboard</a>
@@ -25,6 +29,15 @@
       <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu">☰</button>
     </div>
   </nav>
+
+  <div id="login-banner" class="login-banner">
+    <div class="banner-content">
+      <span>Not signed in</span>
+      <a href="login.html" class="banner-link">Sign in or register</a>
+      <span>to save your scores and compete on the leaderboard</span>
+    </div>
+    <button class="banner-close" id="banner-close" aria-label="Close banner">✕</button>
+  </div>
 
   <section id="hero">
     <div class="hero-bg">
