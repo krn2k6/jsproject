@@ -1,4 +1,6 @@
-﻿const WORDS = [
+// ─── Word list ────────────────────────────────────────────────────────────────
+
+const WORDS = [
   'the','be','to','of','and','a','in','that','have','it','for','not','on','with',
   'he','as','you','do','at','this','but','his','by','from','they','we','say','her',
   'she','or','an','will','my','one','all','would','there','their','what','so','up',
@@ -8,522 +10,494 @@
   'also','back','after','use','two','how','our','work','first','well','way','even',
   'new','want','because','any','these','give','day','most','us','great','between',
   'need','large','often','hand','high','place','hold','world','real','life','few',
-  'north','open','seem','together','next','white','children','begin','got','walk',
-  'example','ease','paper','group','always','music','those','both','mark','book',
-  'letter','until','mile','river','car','feet','care','second','enough','plain',
-  'girl','usual','young','ready','above','ever','red','list','though','feel','talk',
-  'bird','soon','body','dog','family','direct','pose','leave','song','measure',
-  'door','product','black','short','numeral','class','wind','question','happen',
-  'complete','ship','area','half','rock','order','fire','south','problem','piece',
-  'told','knew','pass','since','top','whole','king','space','heard','best','hour',
-  'better','true','during','hundred','five','remember','step','early','hold','west',
-  'ground','interest','reach','fast','verb','sing','listen','six','table','travel',
-  'less','morning','ten','simple','several','vowel','toward','war','lay','against',
-  'pattern','slow','center','love','person','money','serve','appear','road','map',
-  'rain','rule','govern','pull','cold','notice','voice','unit','power','town','fine',
-  'drive','lead','cry','dark','machine','note','wait','plan','figure','star','box',
-  'noun','field','rest','correct','able','pound','done','beauty','stood','contain',
-  'front','teach','week','final','gave','green','oh','quick','develop','ocean','warm',
+  'open','seem','together','next','white','children','begin','walk','example','paper',
+  'group','always','music','those','both','mark','book','letter','until','mile','river',
+  'car','care','second','enough','girl','young','ready','above','ever','red','list',
+  'feel','talk','bird','soon','body','dog','family','leave','song','door','product',
+  'black','short','class','wind','question','happen','complete','ship','area','half',
+  'rock','order','fire','south','problem','piece','told','knew','pass','since','top',
+  'whole','king','space','heard','best','hour','better','true','during','hundred',
+  'five','remember','step','early','west','ground','interest','reach','fast',
+  'sing','listen','six','table','travel','less','morning','ten','simple','several',
+  'vowel','toward','war','lay','against','pattern','slow','center','love','person',
+  'money','serve','appear','road','map','rain','rule','pull','cold','voice','unit',
+  'power','town','fine','drive','lead','cry','dark','note','wait','plan','figure',
+  'star','box','noun','field','rest','correct','able','done','beauty','stood',
+  'front','teach','week','final','gave','green','quick','develop','ocean','warm',
   'free','minute','strong','special','behind','clear','tail','produce','fact','street',
-  'inch','multiply','nothing','course','stay','wheel','full','force','blue','object',
-  'decide','surface','deep','moon','island','foot','system','busy','test','record',
-  'boat','common','gold','possible','plane','dry','wonder','laugh','thousand','ago',
-  'ran','check','game','shape','equate','miss','brought','heat','snow','tire','bring',
-  'yes','distant','fill','east','paint','language','among',
 ];
 
-const STORAGE = {
-  users: JSON.parse(localStorage.getItem('typing_users') || '[]'),
-  scores: JSON.parse(localStorage.getItem('typing_scores') || '[]'),
-  session: localStorage.getItem('typing_session') || null,
-};
+// ─── State ────────────────────────────────────────────────────────────────────
 
+// All the info the test needs while running
 const state = {
-  duration: 30,
-  timeLeft: 30,
-  timer: null,
-  started: false,
-  finished: false,
-  wordList: [],
-  curWord: 0,
-  curChar: 0,
+  duration:     30,   // chosen test length in seconds
+  timeLeft:     30,
+  timer:        null,
+  started:      false,
+  finished:     false,
+  wordList:     [],
+  curWord:      0,    // index of the word the user is on
+  curChar:      0,    // index of the character inside that word
   correctWords: 0,
-  totalTyped: 0,
-  wrongChars: 0,
-  weakWords: [],
-  customText: null,
-  suffix: '',
+  totalTyped:   0,
+  wrongChars:   0,
 };
 
-function saveStorage() {
-  localStorage.setItem('typing_users', JSON.stringify(STORAGE.users));
-  localStorage.setItem('typing_scores', JSON.stringify(STORAGE.scores));
+// ─── localStorage helpers ─────────────────────────────────────────────────────
+
+// Scores are saved as a JSON array in localStorage so they survive page reloads
+function loadScores() {
+  return JSON.parse(localStorage.getItem('typing_scores') || '[]');
+}
+
+function saveScores(scores) {
+  localStorage.setItem('typing_scores', JSON.stringify(scores));
+}
+
+// Users are stored the same way
+function loadUsers() {
+  return JSON.parse(localStorage.getItem('typing_users') || '[]');
+}
+
+function saveUsers(users) {
+  localStorage.setItem('typing_users', JSON.stringify(users));
 }
 
 function currentUser() {
-  return STORAGE.session || 'Guest';
+  return localStorage.getItem('typing_session') || 'Guest';
 }
 
 function isLoggedIn() {
-  return !!STORAGE.session;
+  return localStorage.getItem('typing_session') !== null;
 }
 
-function pickWords(n = 140) {
-  return Array.from({ length: n }, () => WORDS[Math.floor(Math.random() * WORDS.length)]);
+// ─── Word picking ─────────────────────────────────────────────────────────────
+
+function pickWords(count) {
+  count = count || 100;
+  var result = [];
+  for (var i = 0; i < count; i++) {
+    result.push(WORDS[Math.floor(Math.random() * WORDS.length)]);
+  }
+  return result;
 }
 
-function parseCustomText(text) {
-  return text
-    .trim()
-    .replace(/\s+/g, ' ')
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 180);
-}
-
-function getId(id) {
-  return document.getElementById(state.suffix + id);
-}
+// ─── Build the word display ───────────────────────────────────────────────────
 
 function buildDisplay() {
-  const wrap = getId('words-wrap');
+  var wrap = document.getElementById('words-wrap');
   if (!wrap) return;
   wrap.innerHTML = '';
 
-  state.wordList.forEach((word, wi) => {
-    const span = document.createElement('span');
-    span.className = 'w';
-    span.dataset.wi = wi;
+  for (var wi = 0; wi < state.wordList.length; wi++) {
+    var word = state.wordList[wi];
+    var wordSpan = document.createElement('span');
+    wordSpan.className = 'w';
+    wordSpan.dataset.wi = wi;
 
-    word.split('').forEach((ch, ci) => {
-      const s = document.createElement('span');
-      s.className = 'ch pending';
-      s.textContent = ch;
-      s.dataset.wi = wi;
-      s.dataset.ci = ci;
-      span.appendChild(s);
-    });
+    for (var ci = 0; ci < word.length; ci++) {
+      var charSpan = document.createElement('span');
+      charSpan.className = 'ch pending';
+      charSpan.textContent = word[ci];
+      charSpan.dataset.wi = wi;
+      charSpan.dataset.ci = ci;
+      wordSpan.appendChild(charSpan);
+    }
 
-    wrap.appendChild(span);
-  });
+    wrap.appendChild(wordSpan);
+  }
 
   placeCursor();
 }
 
+// ─── Cursor helpers ───────────────────────────────────────────────────────────
+
 function getChar(wi, ci) {
-  return document.querySelector(`.ch[data-wi="${wi}"][data-ci="${ci}"]`);
+  return document.querySelector('.ch[data-wi="' + wi + '"][data-ci="' + ci + '"]');
 }
 
 function setCharState(wi, ci, cls) {
-  const el = getChar(wi, ci);
+  var el = getChar(wi, ci);
   if (el) el.className = 'ch ' + cls;
 }
 
 function placeCursor() {
-  document.querySelectorAll('.ch.cursor').forEach(el => el.classList.remove('cursor'));
-  const word = state.wordList[state.curWord];
+  // Remove cursor from wherever it was
+  var old = document.querySelectorAll('.ch.cursor');
+  for (var i = 0; i < old.length; i++) old[i].classList.remove('cursor');
+
+  var word = state.wordList[state.curWord];
   if (!word) return;
-  const ci = Math.min(state.curChar, word.length - 1);
-  const el = getChar(state.curWord, ci);
+
+  var ci = Math.min(state.curChar, word.length - 1);
+  var el = getChar(state.curWord, ci);
   if (el) el.classList.add('cursor');
 }
 
+// ─── Timer display ────────────────────────────────────────────────────────────
+
 function updateTimerUI() {
-  const timerEl = getId('timer-display');
-  if (timerEl) timerEl.textContent = state.timeLeft + 's';
-  const timeStatus = getId('s-time');
-  if (timeStatus) timeStatus.textContent = state.timeLeft;
+  var el = document.getElementById('timer-display');
+  if (el) el.textContent = state.timeLeft + 's';
+
+  var timeEl = document.getElementById('s-time');
+  if (timeEl) timeEl.textContent = state.timeLeft;
 }
 
+// ─── Live stats (shown while typing) ─────────────────────────────────────────
+
 function updateLiveStats() {
-  const elapsed = state.duration - state.timeLeft;
+  var elapsed = state.duration - state.timeLeft;
   if (elapsed <= 0) return;
 
-  const wpm = Math.round(state.correctWords / (elapsed / 60));
-  const acc = state.totalTyped > 0
+  var wpm = Math.round(state.correctWords / (elapsed / 60));
+  var acc = state.totalTyped > 0
     ? Math.round(((state.totalTyped - state.wrongChars) / state.totalTyped) * 100)
     : 100;
 
-  const wpmEl = getId('s-wpm');
-  const accEl = getId('s-acc');
-  const wordsEl = getId('s-words');
+  var wpmEl  = document.getElementById('s-wpm');
+  var accEl  = document.getElementById('s-acc');
+  var wordsEl = document.getElementById('s-words');
 
-  if (wpmEl) wpmEl.textContent = wpm || '—';
-  if (accEl) accEl.textContent = state.totalTyped > 0 ? acc + '%' : '—';
+  if (wpmEl)  wpmEl.textContent  = wpm || '—';
+  if (accEl)  accEl.textContent  = state.totalTyped > 0 ? acc + '%' : '—';
   if (wordsEl) wordsEl.textContent = state.correctWords;
 }
+
+// ─── Finish the test ──────────────────────────────────────────────────────────
 
 function finish() {
   state.finished = true;
   clearInterval(state.timer);
 
-  const wpm = Math.round(state.correctWords / (state.duration / 60));
-  const acc = state.totalTyped > 0
+  var wpm = Math.round(state.correctWords / (state.duration / 60));
+  var acc = state.totalTyped > 0
     ? Math.round(((state.totalTyped - state.wrongChars) / state.totalTyped) * 100)
     : 100;
 
-  const wpmEl = getId('res-wpm');
-  const accEl = getId('res-acc');
-  const wordsEl = getId('res-words');
-  const charsEl = getId('res-chars');
-  const overlay = getId('result-overlay');
-  const input = getId('type-input');
+  var wpmEl   = document.getElementById('res-wpm');
+  var accEl   = document.getElementById('res-acc');
+  var wordsEl = document.getElementById('res-words');
+  var charsEl = document.getElementById('res-chars');
+  var overlay = document.getElementById('result-overlay');
+  var input   = document.getElementById('type-input');
 
-  if (wpmEl) wpmEl.textContent = wpm;
-  if (accEl) accEl.textContent = acc + '%';
+  if (wpmEl)   wpmEl.textContent   = wpm;
+  if (accEl)   accEl.textContent   = acc + '%';
   if (wordsEl) wordsEl.textContent = state.correctWords;
   if (charsEl) charsEl.textContent = state.totalTyped;
   if (overlay) overlay.classList.add('show');
-  if (input) input.disabled = true;
+  if (input)   input.disabled = true;
 
-  saveScore(wpm, acc, state.duration);
-  renderWeakWords();
+  saveScore(wpm, acc);
 }
 
-function restartTest(custom = false) {
-  clearInterval(state.timer);
-  state.timeLeft = state.duration;
-  state.timer = null;
-  state.started = false;
-  state.finished = false;
-  state.curWord = 0;
-  state.curChar = 0;
-  state.correctWords = 0;
-  state.totalTyped = 0;
-  state.wrongChars = 0;
+// ─── Restart ──────────────────────────────────────────────────────────────────
 
-  if (state.customText) {
-    state.wordList = parseCustomText(state.customText);
-  } else {
-    state.wordList = pickWords();
-  }
+function restartTest() {
+  clearInterval(state.timer);
+  state.timeLeft    = state.duration;
+  state.timer       = null;
+  state.started     = false;
+  state.finished    = false;
+  state.curWord     = 0;
+  state.curChar     = 0;
+  state.correctWords = 0;
+  state.totalTyped  = 0;
+  state.wrongChars  = 0;
+  state.wordList    = pickWords();
 
   buildDisplay();
-  renderWeakWords();
-  const overlay = getId('result-overlay');
+
+  var overlay = document.getElementById('result-overlay');
   if (overlay) overlay.classList.remove('show');
 
-  const input = getId('type-input');
+  var wpmEl   = document.getElementById('s-wpm');
+  var accEl   = document.getElementById('s-acc');
+  var wordsEl = document.getElementById('s-words');
+  var timeEl  = document.getElementById('s-time');
+  var timerEl = document.getElementById('timer-display');
+
+  if (wpmEl)   wpmEl.textContent   = '—';
+  if (accEl)   accEl.textContent   = '—';
+  if (wordsEl) wordsEl.textContent = '0';
+  if (timeEl)  timeEl.textContent  = '—';
+  if (timerEl) timerEl.textContent = '—';
+
+  var input = document.getElementById('type-input');
   if (input) {
     input.disabled = false;
     input.value = '';
     input.focus();
   }
-
-  const input2 = getId('custom-type-input');
-  if (input2) {
-    input2.disabled = !state.customText;
-    if (!state.customText) input2.value = '';
-  }
-
-  const wpmEl = getId('s-wpm');
-  const accEl = getId('s-acc');
-  const wordsEl = getId('s-words');
-  const timeEl = getId('s-time');
-
-  if (wpmEl) wpmEl.textContent = '—';
-  if (accEl) accEl.textContent = '—';
-  if (wordsEl) wordsEl.textContent = '0';
-  if (timeEl) timeEl.textContent = '—';
-  const timerEl = getId('timer-display');
-  if (timerEl) timerEl.textContent = '—';
 }
 
-function saveScore(wpm, acc, dur) {
+// ─── Save & display scores ────────────────────────────────────────────────────
+
+function saveScore(wpm, acc) {
   if (!isLoggedIn()) {
-    const note = getId('save-note');
-    if (note) note.textContent = 'You are not logged in. Register or sign in to save results.';
+    var note = document.getElementById('save-note');
+    if (note) {
+      note.textContent = 'Not logged in — sign in to save your scores.';
+      note.style.display = 'block';
+    }
     return;
   }
 
-  const username = currentUser();
-  STORAGE.scores.push({ username, wpm, acc, dur, date: new Date().toLocaleDateString() });
-  STORAGE.scores.sort((a, b) => b.wpm - a.wpm || b.acc - a.acc);
-  if (STORAGE.scores.length > 100) STORAGE.scores = STORAGE.scores.slice(0, 100);
-  saveStorage();
+  var scores = loadScores();
+  scores.push({
+    username: currentUser(),
+    wpm: wpm,
+    acc: acc,
+    dur: state.duration,
+    date: new Date().toLocaleDateString()
+  });
+
+  // Keep only the top 100 scores sorted by WPM
+  scores.sort(function(a, b) { return b.wpm - a.wpm; });
+  if (scores.length > 100) scores = scores.slice(0, 100);
+
+  saveScores(scores);
   renderLeaderboard();
   renderPersonalStats();
 }
 
 function renderLeaderboard() {
-  const list = document.getElementById('leaderboard-list');
-  const scoreList = document.getElementById('scores-list');
+  var list = document.getElementById('leaderboard-list');
+  var scoreList = document.getElementById('scores-list');
+  var scores = loadScores();
+
+  var topTen = scores.slice(0, 10);
+
   if (list) {
-    list.innerHTML = STORAGE.scores.slice(0, 10).map((s, i) => `
-      <div class="score-row">
-        <span class="score-rank">${i + 1}</span>
-        <span class="score-wpm">${s.wpm}</span>
-        <span class="score-meta">${s.username}<br><span class="score-dur">${s.acc}% · ${s.dur}s</span></span>
-      </div>
-    `).join('') || '<div class="empty-scores">no scores yet — take a run to start the leaderboard.</div>';
+    if (topTen.length === 0) {
+      list.innerHTML = '<div class="empty-scores">no scores yet — take a run to start the leaderboard.</div>';
+    } else {
+      list.innerHTML = topTen.map(function(s, i) {
+        return '<div class="score-row">' +
+          '<span class="score-rank">' + (i + 1) + '</span>' +
+          '<span class="score-wpm">' + s.wpm + '</span>' +
+          '<span class="score-meta">' + s.username + '<br><span class="score-dur">' + s.acc + '% · ' + s.dur + 's</span></span>' +
+          '</div>';
+      }).join('');
+    }
   }
 
   if (scoreList) {
-    scoreList.innerHTML = STORAGE.scores.slice(0, 8).map((s, i) => `
-      <div class="score-row">
-        <span class="score-rank">${i + 1}</span>
-        <span class="score-wpm">${s.wpm}</span>
-        <span class="score-meta">${s.username}<br><span class="score-dur">${s.acc}% · ${s.dur}s</span></span>
-      </div>
-    `).join('');
+    scoreList.innerHTML = scores.slice(0, 8).map(function(s, i) {
+      return '<div class="score-row">' +
+        '<span class="score-rank">' + (i + 1) + '</span>' +
+        '<span class="score-wpm">' + s.wpm + '</span>' +
+        '<span class="score-meta">' + s.username + '<br><span class="score-dur">' + s.acc + '% · ' + s.dur + 's</span></span>' +
+        '</div>';
+    }).join('');
   }
 }
 
 function renderPersonalStats() {
-  const name = currentUser();
-  const userScores = STORAGE.scores.filter(s => s.username === name);
-  const best = userScores.reduce((max, s) => Math.max(max, s.wpm), 0);
-  const bestAcc = userScores.reduce((max, s) => Math.max(max, s.acc), 0);
-  const avg = userScores.length ? Math.round(userScores.reduce((sum, s) => sum + s.wpm, 0) / userScores.length) : '—';
+  var name = currentUser();
+  var scores = loadScores();
+  var userScores = scores.filter(function(s) { return s.username === name; });
 
-  const pbWpm = document.getElementById('pb-wpm');
-  const pbMeta = document.getElementById('pb-meta');
-  const statRuns = document.getElementById('stat-runs');
-  const statAvg = document.getElementById('stat-avg');
-  const statBestAcc = document.getElementById('stat-best-acc');
+  var bestWpm = 0;
+  var bestAcc = 0;
+  var totalWpm = 0;
 
-  if (pbWpm) pbWpm.textContent = best || '—';
-  if (pbMeta) pbMeta.textContent = userScores.length ? `${bestAcc}% accuracy · ${userScores[0].dur}s` : 'no runs yet';
-  if (statRuns) statRuns.textContent = userScores.length;
-  if (statAvg) statAvg.textContent = avg;
-  if (statBestAcc) statBestAcc.textContent = userScores.length ? bestAcc + '%' : '—';
-}
-
-function renderWeakWords() {
-  const wrapper = getId('weak-words-list');
-  if (!wrapper) return;
-  if (!state.weakWords.length) {
-    wrapper.innerHTML = 'Finish a session to generate a focused word list.';
-    return;
+  for (var i = 0; i < userScores.length; i++) {
+    if (userScores[i].wpm > bestWpm) bestWpm = userScores[i].wpm;
+    if (userScores[i].acc > bestAcc) bestAcc = userScores[i].acc;
+    totalWpm += userScores[i].wpm;
   }
 
-  wrapper.innerHTML = state.weakWords.slice(0, 12).map(word => `
-    <span class="weak-word-tag">${word}</span>
-  `).join('');
-}
+  var avg = userScores.length > 0 ? Math.round(totalWpm / userScores.length) : 0;
 
-function practiceWeakWords() {
-  if (!state.weakWords.length) return;
-  state.wordList = [...new Set(state.weakWords)];
-  state.duration = 30;
-  restartTest();
+  var pbWpm      = document.getElementById('pb-wpm');
+  var pbMeta     = document.getElementById('pb-meta');
+  var statRuns   = document.getElementById('stat-runs');
+  var statAvg    = document.getElementById('stat-avg');
+  var statBestAcc = document.getElementById('stat-best-acc');
+
+  if (pbWpm)      pbWpm.textContent      = bestWpm || '—';
+  if (pbMeta)     pbMeta.textContent     = userScores.length > 0 ? bestAcc + '% accuracy' : 'no runs yet';
+  if (statRuns)   statRuns.textContent   = userScores.length;
+  if (statAvg)    statAvg.textContent    = avg || '—';
+  if (statBestAcc) statBestAcc.textContent = userScores.length > 0 ? bestAcc + '%' : '—';
 }
 
 function clearHistory() {
-  STORAGE.scores = [];
-  saveStorage();
+  saveScores([]);
   renderLeaderboard();
   renderPersonalStats();
-  const note = getId('save-note');
-  if (note) note.textContent = 'History cleared. Sign in to save fresh runs.';
 }
 
-function renderAuthProfile() {
-  const profileName = document.getElementById('profile-name');
-  const profileMeta = document.getElementById('profile-meta');
-  const profileBest = document.getElementById('profile-best');
-  const profileRuns = document.getElementById('profile-runs');
-  const profileAcc = document.getElementById('profile-acc');
+// ─── Auth (login / register) ──────────────────────────────────────────────────
 
-  const user = currentUser();
-  const userScores = STORAGE.scores.filter(s => s.username === user);
-  const best = userScores.reduce((max, s) => Math.max(max, s.wpm), 0);
-  const bestAcc = userScores.reduce((max, s) => Math.max(max, s.acc), 0);
+function registerUser(username, password) {
+  if (!username || username.length < 3) return 'Username needs at least 3 characters.';
+  if (!password || password.length < 4) return 'Password needs at least 4 characters.';
 
-  if (profileName) profileName.textContent = user;
-  if (profileMeta) profileMeta.textContent = isLoggedIn() ? 'currently signed in' : 'guest session';
-  if (profileBest) profileBest.textContent = best || '—';
-  if (profileRuns) profileRuns.textContent = userScores.length;
-  if (profileAcc) profileAcc.textContent = userScores.length ? bestAcc + '%' : '—';
+  var users = loadUsers();
+  var exists = users.some(function(u) {
+    return u.username.toLowerCase() === username.toLowerCase();
+  });
+  if (exists) return 'Username already taken.';
+
+  users.push({ username: username, password: password });
+  saveUsers(users);
+
+  localStorage.setItem('typing_session', username);
+  return 'Welcome, ' + username + '! You are now logged in.';
 }
 
-function renderUserGreeting() {
-  const greeting = document.getElementById('user-greeting');
-  if (!greeting) return;
-  if (isLoggedIn()) {
-    greeting.textContent = `Signed in as ${currentUser()}. Your progress is being saved to the leaderboard.`;
-  } else {
-    greeting.textContent = 'Not signed in yet — visit login to save your runs and compete with other users.';
-  }
-}
+function loginUser(username, password) {
+  var users = loadUsers();
+  var found = null;
 
-function renderLoginBanner() {
-  const banner = document.getElementById('login-banner');
-  if (!banner) return;
-  const closed = localStorage.getItem('typing_banner_closed') === '1';
-  if (isLoggedIn() || closed) {
-    banner.style.display = 'none';
-  } else {
-    banner.style.display = 'flex';
-  }
-}
-
-function closeBanner() {
-  const banner = document.getElementById('login-banner');
-  if (banner) banner.style.display = 'none';
-  localStorage.setItem('typing_banner_closed', '1');
-}
-
-function renderUserMenu() {
-  const userMenu = document.getElementById('user-menu');
-  const userToggle = document.getElementById('user-toggle');
-  if (!userMenu || !userToggle) return;
-  
-  if (isLoggedIn()) {
-    userToggle.style.display = 'flex';
-    userToggle.textContent = currentUser();
-    
-    const dropdown = userToggle.nextElementSibling;
-    if (dropdown && dropdown.classList.contains('user-dropdown')) {
-      dropdown.innerHTML = `
-        <div class="dropdown-item">Signed in as <strong>${currentUser()}</strong></div>
-        <div class="dropdown-divider"></div>
-        <button class="dropdown-item logout-btn">logout</button>
-      `;
-      dropdown.querySelector('.logout-btn').addEventListener('click', logout);
+  for (var i = 0; i < users.length; i++) {
+    if (users[i].username.toLowerCase() === username.toLowerCase() &&
+        users[i].password === password) {
+      found = users[i];
+      break;
     }
-  } else {
-    userToggle.style.display = 'none';
   }
+
+  if (!found) return 'Wrong username or password.';
+
+  localStorage.setItem('typing_session', found.username);
+  return 'Welcome back, ' + found.username + '!';
 }
 
 function logout() {
-  STORAGE.session = null;
   localStorage.removeItem('typing_session');
-  renderUserMenu();
-  renderLoginBanner();
-  renderUserGreeting();
-  renderPersonalStats();
-  renderAuthProfile();
   location.reload();
 }
 
-function setTheme(theme) {
-  document.documentElement.dataset.theme = theme;
-  localStorage.setItem('typing_theme', theme);
-  const btn = document.getElementById('theme-toggle');
-  if (btn) btn.textContent = theme === 'light' ? '🌙' : '☀';
-}
+// ─── Theme toggle ─────────────────────────────────────────────────────────────
 
 function initTheme() {
-  const saved = localStorage.getItem('typing_theme') || 'dark';
-  setTheme(saved);
-  const btn = document.getElementById('theme-toggle');
-  if (btn) btn.addEventListener('click', () => setTheme(document.documentElement.dataset.theme === 'light' ? 'dark' : 'light'));
-}
+  var saved = localStorage.getItem('typing_theme') || 'dark';
+  document.documentElement.dataset.theme = saved;
 
-function initSmoothScroll() {
-  document.querySelectorAll('a[href^="#"]').forEach(link => {
-    link.addEventListener('click', e => {
-      const target = document.querySelector(link.getAttribute('href'));
-      if (target) {
-        e.preventDefault();
-        target.scrollIntoView({ behavior: 'smooth' });
-      }
-    });
+  var btn = document.getElementById('theme-toggle');
+  if (!btn) return;
+
+  btn.textContent = saved === 'light' ? '🌙' : '☀';
+
+  btn.addEventListener('click', function() {
+    var current = document.documentElement.dataset.theme;
+    var next = current === 'light' ? 'dark' : 'light';
+    document.documentElement.dataset.theme = next;
+    localStorage.setItem('typing_theme', next);
+    btn.textContent = next === 'light' ? '🌙' : '☀';
   });
 }
 
+// ─── Mobile nav toggle ────────────────────────────────────────────────────────
+
 function initNavToggle() {
-  const btn = document.getElementById('nav-toggle');
-  const nav = document.querySelector('.nav-links');
+  var btn = document.getElementById('nav-toggle');
+  var nav = document.querySelector('.nav-links');
   if (!btn || !nav) return;
 
-  btn.addEventListener('click', () => nav.classList.toggle('show'));
-  document.addEventListener('click', e => {
+  btn.addEventListener('click', function() {
+    nav.classList.toggle('show');
+  });
+
+  // Close nav when clicking anywhere else on the page
+  document.addEventListener('click', function(e) {
     if (!nav.contains(e.target) && !btn.contains(e.target)) {
       nav.classList.remove('show');
     }
   });
 }
 
+// ─── Prevent space from scrolling the page ────────────────────────────────────
+
 function stopSpaceScroll() {
-  window.addEventListener('keydown', e => {
-    if (e.code === 'Space' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName) && !e.target.isContentEditable) {
+  window.addEventListener('keydown', function(e) {
+    var tag = e.target.tagName;
+    if (e.code === 'Space' && tag !== 'INPUT' && tag !== 'TEXTAREA' && tag !== 'SELECT') {
       e.preventDefault();
     }
   });
 }
 
+// ─── Typing input handler ─────────────────────────────────────────────────────
+
 function handleInput(e) {
   if (state.finished) return;
-  const val = e.target.value;
+
+  var val = e.target.value;
+
+  // Start the timer on the first keystroke
   if (!state.started && val.length > 0) startTimer();
 
+  // Space = submit the current word
   if (val.endsWith(' ')) {
-    const typed = val.trim();
-    if (!typed.length) { e.target.value = ''; return; }
+    var typed = val.trim();
+    if (!typed) { e.target.value = ''; return; }
 
-    const word = state.wordList[state.curWord];
-    const correct = typed === word;
-    if (correct) state.correctWords++;
-    if (!correct && word && !state.weakWords.includes(word)) state.weakWords.push(word);
+    var word = state.wordList[state.curWord];
+    if (typed === word) state.correctWords++;
 
+    // Mark each character correct / wrong / pending
     if (word) {
-      word.split('').forEach((_, ci) => {
-        const tc = typed[ci];
+      for (var ci = 0; ci < word.length; ci++) {
+        var tc = typed[ci];
         state.totalTyped++;
-        if (tc === undefined) setCharState(state.curWord, ci, 'pending');
-        else if (tc === word[ci]) setCharState(state.curWord, ci, 'correct');
-        else { setCharState(state.curWord, ci, 'wrong'); state.wrongChars++; }
-      });
+        if (tc === undefined) {
+          setCharState(state.curWord, ci, 'pending');
+        } else if (tc === word[ci]) {
+          setCharState(state.curWord, ci, 'correct');
+        } else {
+          setCharState(state.curWord, ci, 'wrong');
+          state.wrongChars++;
+        }
+      }
     }
 
     state.curWord++;
     state.curChar = 0;
     e.target.value = '';
 
+    // Add more words if we're running low
     if (state.curWord >= state.wordList.length) {
-      state.wordList = [...state.wordList, ...pickWords(40)];
+      state.wordList = state.wordList.concat(pickWords(40));
       buildDisplay();
     }
 
     placeCursor();
-    document.querySelector(`.w[data-wi="${state.curWord}"]`)?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+
+    // Scroll the next word into view
+    var nextWordEl = document.querySelector('.w[data-wi="' + state.curWord + '"]');
+    if (nextWordEl) nextWordEl.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+
     if (state.started) updateLiveStats();
     return;
   }
 
+  // Update character highlights as the user types each letter
   state.curChar = val.length;
-  const word = state.wordList[state.curWord];
-  if (word) {
-    word.split('').forEach((_, ci) => {
-      const tc = val[ci];
-      if (tc === undefined) setCharState(state.curWord, ci, 'pending');
-      else if (tc === word[ci]) setCharState(state.curWord, ci, 'correct');
-      else setCharState(state.curWord, ci, 'wrong');
-    });
+  var currentWord = state.wordList[state.curWord];
+  if (currentWord) {
+    for (var i = 0; i < currentWord.length; i++) {
+      var typedChar = val[i];
+      if (typedChar === undefined) {
+        setCharState(state.curWord, i, 'pending');
+      } else if (typedChar === currentWord[i]) {
+        setCharState(state.curWord, i, 'correct');
+      } else {
+        setCharState(state.curWord, i, 'wrong');
+      }
+    }
   }
 
   placeCursor();
   if (state.started) updateLiveStats();
 }
 
-function handleKeydown(e) {
-}
-
-function handleKeyVisualizerDown(e) {
-  const key = e.key === ' ' ? ' ' : e.key;
-  document.querySelectorAll(`.key[data-key="${CSS.escape(key)}"]`).forEach(k => k.classList.add('pressed'));
-}
-
-function handleKeyVisualizerUp(e) {
-  const key = e.key === ' ' ? ' ' : e.key;
-  document.querySelectorAll(`.key[data-key="${CSS.escape(key)}"]`).forEach(k => k.classList.remove('pressed'));
-}
-
-function initDurationButtons() {
-  const durGroup = document.getElementById('dur-group');
-  if (!durGroup) return;
-  durGroup.querySelectorAll('.mode-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      durGroup.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      state.duration = parseInt(btn.dataset.dur, 10);
-      restartTest();
-    });
-  });
-}
+// ─── Timer ────────────────────────────────────────────────────────────────────
 
 function startTimer() {
   if (state.started) return;
@@ -531,7 +505,7 @@ function startTimer() {
   state.timeLeft = state.duration;
   updateTimerUI();
 
-  state.timer = setInterval(() => {
+  state.timer = setInterval(function() {
     state.timeLeft--;
     updateTimerUI();
     updateLiveStats();
@@ -539,233 +513,135 @@ function startTimer() {
   }, 1000);
 }
 
+// ─── Duration buttons ─────────────────────────────────────────────────────────
+
+function initDurationButtons() {
+  var group = document.getElementById('dur-group');
+  if (!group) return;
+
+  var buttons = group.querySelectorAll('.mode-btn');
+  for (var i = 0; i < buttons.length; i++) {
+    buttons[i].addEventListener('click', function() {
+      // Clear active class from all buttons
+      for (var j = 0; j < buttons.length; j++) buttons[j].classList.remove('active');
+      this.classList.add('active');
+      state.duration = parseInt(this.dataset.dur, 10);
+      restartTest();
+    });
+  }
+}
+
+// ─── Page initializers ────────────────────────────────────────────────────────
+
 function initHomePage() {
-  state.customText = null;
-  state.suffix = '';
   state.wordList = pickWords();
-  state.weakWords = [];
   buildDisplay();
-  renderWeakWords();
   renderLeaderboard();
   renderPersonalStats();
-  renderUserGreeting();
   initDurationButtons();
 
-  const input = getId('type-input');
+  var input = document.getElementById('type-input');
   if (input) {
     input.addEventListener('input', handleInput);
-    input.addEventListener('keydown', handleKeydown);
     input.focus();
   }
 
-  const restart = document.getElementById('restart-btn');
-  if (restart) restart.addEventListener('click', () => restartTest());
-  const retry = document.getElementById('result-retry');
-  if (retry) retry.addEventListener('click', () => restartTest());
-  const clearBtn = document.getElementById('clear-btn');
+  var restartBtn = document.getElementById('restart-btn');
+  if (restartBtn) restartBtn.addEventListener('click', restartTest);
+
+  var retryBtn = document.getElementById('result-retry');
+  if (retryBtn) retryBtn.addEventListener('click', restartTest);
+
+  var clearBtn = document.getElementById('clear-btn');
   if (clearBtn) clearBtn.addEventListener('click', clearHistory);
-  const weakBtn = document.getElementById('practice-weak-btn');
-  if (weakBtn) weakBtn.addEventListener('click', practiceWeakWords);
+
+  // Show the logged-in user's name in the greeting
+  var greeting = document.getElementById('user-greeting');
+  if (greeting) {
+    if (isLoggedIn()) {
+      greeting.textContent = 'Signed in as ' + currentUser() + '. Your scores are being saved.';
+    } else {
+      greeting.textContent = 'Not signed in — visit the login page to save your scores.';
+    }
+  }
 }
 
 function initAuthPage() {
   renderLeaderboard();
-  renderAuthProfile();
 
-  const tabs = document.querySelectorAll('.auth-tab');
-  const loginForm = document.getElementById('login-form');
-  const registerForm = document.getElementById('register-form');
-  const message = document.getElementById('auth-message');
+  var tabs        = document.querySelectorAll('.auth-tab');
+  var loginForm   = document.getElementById('login-form');
+  var registerForm = document.getElementById('register-form');
+  var message     = document.getElementById('auth-message');
 
-  tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      tabs.forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      const target = tab.dataset.tab;
-      if (target === 'login') {
-        loginForm.style.display = 'block';
+  // Tab switching
+  for (var i = 0; i < tabs.length; i++) {
+    tabs[i].addEventListener('click', function() {
+      for (var j = 0; j < tabs.length; j++) tabs[j].classList.remove('active');
+      this.classList.add('active');
+
+      if (this.dataset.tab === 'login') {
+        loginForm.style.display    = 'block';
         registerForm.style.display = 'none';
-        if (message) message.textContent = 'Enter your username and password to sign in.';
       } else {
-        loginForm.style.display = 'none';
+        loginForm.style.display    = 'none';
         registerForm.style.display = 'block';
-        if (message) message.textContent = 'Choose a username and password to register.';
       }
     });
-  });
+  }
 
   if (loginForm) {
-    loginForm.addEventListener('submit', e => {
+    loginForm.addEventListener('submit', function(e) {
       e.preventDefault();
-      const username = document.getElementById('login-user').value.trim();
-      const password = document.getElementById('login-pass').value.trim();
-      const result = loginUser(username, password);
+      var username = document.getElementById('login-user').value.trim();
+      var password = document.getElementById('login-pass').value.trim();
+      var result = loginUser(username, password);
       if (message) message.textContent = result;
-      renderAuthProfile();
-      renderUserGreeting();
-      renderUserMenu();
-      renderLoginBanner();
     });
   }
 
   if (registerForm) {
-    registerForm.addEventListener('submit', e => {
+    registerForm.addEventListener('submit', function(e) {
       e.preventDefault();
-      const username = document.getElementById('register-user').value.trim();
-      const password = document.getElementById('register-pass').value.trim();
-      const result = registerUser(username, password);
+      var username = document.getElementById('register-user').value.trim();
+      var password = document.getElementById('register-pass').value.trim();
+      var result = registerUser(username, password);
       if (message) message.textContent = result;
-      renderAuthProfile();
-      renderUserGreeting();
-      renderUserMenu();
-      renderLoginBanner();
-    });
-  }
-}
-
-function initCustomPage() {
-  state.suffix = 'custom-';
-  state.customText = null;
-  state.duration = parseInt(document.getElementById('custom-duration')?.value || '30', 10);
-  const input = document.getElementById('custom-type-input');
-  const loadButton = document.getElementById('load-custom-btn');
-  const fileInput = document.getElementById('custom-file');
-  const shareBlock = document.getElementById('share-block');
-  const shareNote = document.getElementById('share-note');
-  const shareLinkBtn = document.getElementById('share-link-btn');
-
-  if (loadButton) {
-    loadButton.addEventListener('click', () => {
-      const text = document.getElementById('custom-text-input').value.trim();
-      if (!text) return alert('Please paste or upload some text first.');
-      loadCustomText(text);
-      if (shareBlock) shareBlock.style.display = 'block';
-      if (shareNote) shareNote.textContent = 'Custom text loaded. Share this URL with anyone to challenge them.';
     });
   }
 
-  if (fileInput) {
-    fileInput.addEventListener('change', e => {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = () => {
-        const text = reader.result;
-        document.getElementById('custom-text-input').value = text;
-      };
-      reader.readAsText(file);
-    });
-  }
-
-  if (shareLinkBtn) {
-    shareLinkBtn.addEventListener('click', () => {
-      const text = state.customText || document.getElementById('custom-text-input').value.trim();
-      if (!text) return alert('Load some text before sharing.');
-      const encoded = encodeURIComponent(text);
-      const url = `${window.location.origin}${window.location.pathname}?text=${encoded}`;
-      navigator.clipboard.writeText(url).then(() => alert('Share link copied!'));
-    });
-  }
-
-  const params = new URLSearchParams(window.location.search);
-  const sharedText = params.get('text');
-  if (sharedText) {
-    const decoded = decodeURIComponent(sharedText);
-    document.getElementById('custom-text-input').value = decoded;
-    loadCustomText(decoded);
-    if (shareBlock) shareBlock.style.display = 'block';
-    if (shareNote) shareNote.textContent = 'This custom test came from a shared link.';
-  }
-
-  if (input) {
-    input.addEventListener('input', handleInput);
-    input.addEventListener('keydown', handleKeydown);
-  }
-
-  const retry = document.getElementById('custom-result-retry');
-  if (retry) retry.addEventListener('click', () => restartTest());
+  // Logout button (if present on login page)
+  var logoutBtn = document.getElementById('logout-btn');
+  if (logoutBtn) logoutBtn.addEventListener('click', logout);
 }
 
 function initContactPage() {
-  const form = document.querySelector('.contact-form');
-  const contactCard = document.querySelector('.contact-card');
+  var form = document.querySelector('.contact-form');
   if (!form) return;
-  form.addEventListener('submit', e => {
+
+  form.addEventListener('submit', function(e) {
     e.preventDefault();
     alert('Message sent! Thanks for reaching out.');
-    // clear inputs
     form.reset();
-    // optional lightweight confirmation text
-    if (contactCard) {
-      const note = document.createElement('div');
-      note.className = 'note-box';
-      note.textContent = 'Thanks — your message was sent.';
-      contactCard.appendChild(note);
-      setTimeout(() => note.remove(), 4000);
-    }
   });
 }
 
-function loadCustomText(text) {
-  state.customText = text;
-  state.duration = parseInt(document.getElementById('custom-duration')?.value || '30', 10);
-  restartTest(true);
-  const input = document.getElementById('custom-type-input');
-  if (input) {
-    input.disabled = false;
-    input.placeholder = 'Start typing your custom text here...';
-    input.focus();
-  }
-}
-
-function registerUser(username, password) {
-  if (!username || username.length < 3) return 'Username needs at least 3 characters.';
-  if (!password || password.length < 4) return 'Password needs at least 4 characters.';
-  if (STORAGE.users.some(u => u.username.toLowerCase() === username.toLowerCase())) return 'Username already exists.';
-  STORAGE.users.push({ username, password });
-  saveStorage();
-  STORAGE.session = username;
-  localStorage.setItem('typing_session', username);
-  localStorage.setItem('typing_banner_closed', '1');
-  return `Welcome, ${username}! You are now logged in.`;
-}
-
-function loginUser(username, password) {
-  const user = STORAGE.users.find(u => u.username.toLowerCase() === username.toLowerCase() && u.password === password);
-  if (!user) return 'Login failed. Check username and password.';
-  STORAGE.session = user.username;
-  localStorage.setItem('typing_session', user.username);
-  localStorage.setItem('typing_banner_closed', '1');
-  return `Welcome back, ${user.username}!`;
-}
+// ─── Entry point ──────────────────────────────────────────────────────────────
 
 function init() {
   initTheme();
   initNavToggle();
-  initSmoothScroll();
   stopSpaceScroll();
-  renderLeaderboard();
-  renderUserGreeting();
-  renderLoginBanner();
-  renderUserMenu();
 
-  // banner close button
-  const bannerCloseBtn = document.getElementById('banner-close');
-  if (bannerCloseBtn) bannerCloseBtn.addEventListener('click', closeBanner);
+  var page = window.location.pathname.split('/').pop();
 
-  const path = window.location.pathname.split('/').pop();
-  if (path === 'login.html') {
+  if (page === 'login.html') {
     initAuthPage();
-  } else if (path === 'custom.html') {
-    initCustomPage();
-  } else if (path === 'contact.html') {
+  } else if (page === 'contact.html') {
     initContactPage();
   } else {
-    initHomePage();
+    initHomePage(); // index.html and anything else
   }
-
-  document.addEventListener('keydown', handleKeyVisualizerDown);
-  document.addEventListener('keyup', handleKeyVisualizerUp);
 }
 
 document.addEventListener('DOMContentLoaded', init);
